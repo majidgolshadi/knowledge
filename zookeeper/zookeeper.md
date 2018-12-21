@@ -93,16 +93,18 @@ Clients can be connect to a leader or a follower node.
 
 
 Read flow:
+![read-flow](pic/read-data.png)
 
-```mermaid
+```
 sequenceDiagram
     client->zookeeper fllower: Give me value `/foo/bar`
     zookeeper fllower-->client: The value is 'zoo'
 ```
 
 Write flow:
+![write-flow](pic/write-data.png)
 
-```mermaid
+```
 sequenceDiagram
     client->zookeeper follower: write /foo/bar = zoo
     zookeeper follower-->zookeeper leader: write /foo/bar = zoo
