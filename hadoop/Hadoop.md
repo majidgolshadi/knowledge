@@ -130,45 +130,19 @@ NameNode keeps the entire namespace **image in RAM**.(image save in ram)
 persist image is **checkpoint**. checkpoint created at **restart**, **checkpointNode** or **administrator request**.
 * **Journal:** The NameNode records changes to HDFS in a write-ahead log called the **journal** in its local native filesystem.
 A ++new checkpoint++ and an ++empty journal++ are written back to the storage directories before the NameNode starts serving clients
-```mermaid
-graph TD;
-    A(checkpoint)-->|init|B(NameNode);
-    B-->|client transaction|D{Can write in journal?};
-    D-->|No|E{Find another node to write?};
-    E-->|No|F(Shoutdown itself);
-    E-->|Yes|C;
-    D-->|Yes|C(journal);
-    C-->|Restart, Admin Req, checkpointNode|A;
-    style A fill:#00FF00;
-    style F fill:#FF6666;
-```
+![journal](pic/journal.png)
+
 * **DataNode:** Each block replica on a DataNode is represented by two files in the local native filesystem
   * Data file
   * metadata file
   	- checksum
   	- generation stamp
 * **CheckpointNode and BackupNode:**
-```mermaid
-graph LR;
-    CPN(checkpointNode)-->|checkpoint|NN(NameNode);
-    NN-->|Journal + checkpoint|CPN;
-    NN-->|sync image|BN(BackupNode);
-    BN-->|create checkpoint|BN
-    NN-->|journal stream|BN;
-    style NN fill:#00FF00;
-```
+![checkpoint](pic/checkpoint.png)
 
 * **File Read and Write:** An application adds data to HDFS by creating a new file and writing the data to it. After the file is closed, the bytes written cannot be altered or removed except that new data can be added to the file by reopening the file for append. HDFS implements a single-writer, multiple-reader model.
-```mermaid
-graph TD;
-	F(file)-->|client request|C(Create);
-    C-->|heartbeat|RLW(Renew lease and Writing);
-    RLW-->|heartbeat|RLW;
-    CCW-->|heartbeat|RLW;
-    RLW-->|soft limit expires|CCW(Can change writer);
-    CCW-->|hard limit expires|CF(Close);
-    RLW-->|finish block size|CF;
-```
+![write](pic/write.png)
+
 An HDFS file consists of blocks. When there is a need for a new block, the NameNode allocates a block with a unique block ID and determines a list of DataNodes to host replicas of the block. The DataNodes form a pipeline, the order of which minimizes the total network distance from the client to the last DataNode. **Bytes are pushed to the pipeline** as a **sequence** of packets. The bytes that an application writes first buffer at the client side. After a packet buffer is filled (typically 64 KB), the data are pushed to the pipeline. **The next packet can be pushed to the pipeline before receiving the acknowledgment for the previous packets**. The number of outstanding packets is limited by the outstanding packets window size of the client.
 **After data are written to an HDFS file, HDFS does not provide any guarantee that data are visible to a new reader until the file is closed.**
 
@@ -184,11 +158,7 @@ The design of HDFS I/O is particularly optimized for batch processing systems, l
 ![hadoop-cluster-topology](pic/hadoop-cluster-topology.png)
 * **Replication Management: ** In case that the block has two existing replicas, if the two existing replicas are on the same rack, the third replica is placed on a different rack; otherwise, the third replica is placed on a different node in the same rack as an existing replica. Here the goal is to reduce the cost of creating new replicas.
 * **Balancer: ** Is a tool that balances disk space usage on an HDFS cluster.It takes a **threshold** value as an input parameter, which is a **fraction between 0 and 1**. A **cluster is balanced if**, for each DataNode, the utilization of the node(Defined as the ratio of used space at the node to total capacity of the node) differs from the utilization of the whole cluster(Defined as the ratio of used space in the cluster to total capacity of the cluster) by no more than the threshold value.
-$$
-{\small 0 < Threshold < 1}\\~\\
- \frac{Cluster\space used\space space}{Cluster\space total\space capacity} - \frac{Node\space used\space space}{Node\space total\space capacity} \leq Threshold
-$$
-
+![formula](pic/formula.png)
 * **Block Scanner: ** **Each DataNode** runs a block scanner that **periodically** scans its block replicas and verifies that ++stored checksums match the block data++. Whenever a read client or a block scanner **detects a corrupt block**, it **notifies the NameNode**. The NameNode ++marks the replica as corrupt++, but does not schedule deletion of the replica immediately. Instead, **it starts to replicate a good copy of the block**. Only when the good replica count reaches the replication factor of the block the corrupt replica is scheduled to be removed. This policy aims to preserve data as long as possible. So even if all replicas of a block are corrupt, the policy allows the user to retrieve its data from the corrupt replicas.
 
 * **Decommissioning: **The cluster ++administrator++ specifies list of **nodes to be decommissioned**. Once a DataNode is marked for decommissioning, ++it will not be selected as the target of replica placement++, but it will **continue to serve read requests**. The **NameNode starts to schedule replication of its blocks to other DataNodes**. Once the NameNode detects that **all blocks** on the decommissioning DataNode are **replicated**, the node enters the decommissioned state. Then it can be safely removed from the cluster without jeopardizing any data availability
@@ -205,17 +175,17 @@ automatic hardware calculation [excel](https://0x0fff.com/wp-content/uploads/201
 
 Resources
 ---------
-[Hadoop website](http://hadoop.apache.org)
-[**Hadoop single cluster installation**](https://hadoop.apache.org/docs/stable/hadoop-project-dist/hadoop-common/SingleCluster.html)
-[How to install hadoop on ubuntu 13.10](https://www.digitalocean.com/community/tutorials/how-to-install-hadoop-on-ubuntu-13-10)
-[Geting started with Hadoop 2.2.0 -- Building](http://www.csrdu.org/nauman/2014/01/23/geting-started-with-hadoop-2-2-0-building/)
-[Hadoop architectural overview](https://www.datadoghq.com/blog/hadoop-architecture-overview/)
-[BUILDING APACHE HADOOP FROM SOURCE](https://pravinchavan.wordpress.com/2013/04/14/building-apache-hadoop-from-source/)
-[Hadoop: The Definitive Guide 4th Edition [Tom White]](https://www.amazon.com/gp/product/1449311520/ref=as_li_ss_tl?ie=UTF8&camp=1789&creative=390957&creativeASIN=1449311520&linkCode=as2&tag=matratsblo-20)
-[Hadoop Wiki - GettingStartedWithHadoop](https://wiki.apache.org/hadoop/GettingStartedWithHadoop)
-[What data should we store on hadoop](https://www.pythian.com/blog/what-data-should-we-store-on-hadoop/)
-[**The Hadoop Distributed File System**](http://www.aosabook.org/en/hdfs.html)
-[Inode wiki](https://en.wikipedia.org/wiki/Inode)
-[Input splits in hadoops mapreduce](http://www.dummies.com/programming/big-data/hadoop/input-splits-in-hadoops-mapreduce/)
-[**Hadoop Cluster Sizing**](https://0x0fff.com/hadoop-cluster-sizing/)
-[Understanding SCSI, ATA, SAS and SATA](http://www.webopedia.com/DidYouKnow/Computer_Science/sas_sata.asp)
+* [Hadoop website](http://hadoop.apache.org)
+* [**Hadoop single cluster installation**](https://hadoop.apache.org/docs/stable/hadoop-project-dist/hadoop-common/SingleCluster.html)
+* [How to install hadoop on ubuntu 13.10](https://www.digitalocean.com/community/tutorials/how-to-install-hadoop-on-ubuntu-13-10)
+* [Geting started with Hadoop 2.2.0 -- Building](http://www.csrdu.org/nauman/2014/01/23/geting-started-with-hadoop-2-2-0-building/)
+* [Hadoop architectural overview](https://www.datadoghq.com/blog/hadoop-architecture-overview/)
+* [BUILDING APACHE HADOOP FROM SOURCE](https://pravinchavan.wordpress.com/2013/04/14/building-apache-hadoop-from-source/)
+* [Hadoop: The Definitive Guide 4th Edition [Tom White]](https://www.amazon.com/gp/product/1449311520/ref=as_li_ss_tl?ie=UTF8&camp=1789&creative=390957&creativeASIN=1449311520&linkCode=as2&tag=matratsblo-20)
+* [Hadoop Wiki - GettingStartedWithHadoop](https://wiki.apache.org/hadoop/GettingStartedWithHadoop)
+* [What data should we store on hadoop](https://www.pythian.com/blog/what-data-should-we-store-on-hadoop/)
+* [**The Hadoop Distributed File System**](http://www.aosabook.org/en/hdfs.html)
+* [Inode wiki](https://en.wikipedia.org/wiki/Inode)
+* [Input splits in hadoops mapreduce](http://www.dummies.com/programming/big-data/hadoop/input-splits-in-hadoops-mapreduce/)
+* [**Hadoop Cluster Sizing**](https://0x0fff.com/hadoop-cluster-sizing/)
+* [Understanding SCSI, ATA, SAS and SATA](http://www.webopedia.com/DidYouKnow/Computer_Science/sas_sata.asp)

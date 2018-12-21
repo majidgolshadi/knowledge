@@ -185,8 +185,8 @@ Run it on your machine and connect it to your remote Znode client port(2181). It
 
 Resources
 ----------
-[Zookeper documentation](http://zookeeper.apache.org/doc/trunk/)
-[Setting up Apache ZooKeeper Cluster](http://www.allprogrammingtutorials.com/tutorials/setting-up-apache-zookeeper-cluster.php)
-[ZooKeeper-Distributed Process Coordination book](https://www.amazon.com/ZooKeeper-Distributed-Coordination-Flavio-Junqueira/dp/1449361307)
-[ZooKeeper fundamentals, deployment, and applications](http://www.ibm.com/developerworks/library/bd-zookeeper/)
-[Zookeeper Tutorial](http://www.tutorialspoint.com/zookeeper/)
+* [Zookeper documentation](http://zookeeper.apache.org/doc/trunk/)
+* [Setting up Apache ZooKeeper Cluster](http://www.allprogrammingtutorials.com/tutorials/setting-up-apache-zookeeper-cluster.php)
+* [ZooKeeper-Distributed Process Coordination book](https://www.amazon.com/ZooKeeper-Distributed-Coordination-Flavio-Junqueira/dp/1449361307)
+* [ZooKeeper fundamentals, deployment, and applications](http://www.ibm.com/developerworks/library/bd-zookeeper/)
+* [Zookeeper Tutorial](http://www.tutorialspoint.com/zookeeper/)
