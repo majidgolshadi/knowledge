@@ -119,25 +119,7 @@ There are three popular options for removing old data:
 
 #Administration
 ##Introduction to Sharding
-**Sharding refers to the process of splitting data up across machines;** the term partitioning is also sometimes used to describe this concept. By putting a subset of data on each machine, it becomes possible to store more data and handle more load without requiring larger or more powerful machines, just a larger quantity of less-powerful machines.
-
-MongoDB’s sharding allows you to create a cluster of many machines (shards) and break up your collection across them, putting a subset of data on each shard. This allows your application to grow beyond the resource limits of a standalone server or replica set.
-
->Many people are confused about the difference between replication and sharding. Remember that replication creates an exact copy of your data on multiple servers, so every server is a mirror-image of every other server. Conversely, every shard contains a different subset of data.
-
-**Sharded client connection**
-![sharded](pic/shards.png)
-
-**Nonsharded client connection**
-![nosharded](pic/noshards.png)
-
-###How Sharding Works
-Sharding is also referred as horizontal partitioning. The distinction of horizontal vs vertical comes from the traditional tabular view of a database. A database can be split **vertically — storing** different tables & columns in a separate database, or **horizontally — storing** rows of a same table in multiple database nodes.
-
-![sharding_split](pic/sharding_split.png)
-
-####Algorithmic Sharding
-One way to categorize sharding is algorithmic versus dynamic. In algorithmic sharding, the client can determine a given partition’s database without any help. In dynamic sharding, a separate locator service tracks the partitions amongst the nodes.
+**Sharding** refers to the process of splitting data up across machines so every shard contains a different subset of data. To categorize sharding we have to way **algorithmic** versus **dynamic**. In algorithmic sharding, the client can determine a given partition’s database without any help. In dynamic sharding, a separate locator service tracks the partitions amongst the nodes.
 
 ![algorithm sharding](pic/algorithm sharding.png)
 
