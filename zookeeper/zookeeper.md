@@ -64,7 +64,7 @@ numChildren = 0
 **featurs** and below **types**:
 
 |type|description|command|
-|----|-----------||
+|---|---|---|
 |**Persistence (default)**|-|`create /path data`|
 |**Ephemeral**| Ephemeral znodes are **active until the client is alive**. When a client gets **disconnected** from the ZooKeeper ensemble, then the ephemeral znodes get **deleted automatically**. For this reason, only ephemeral znodes are **not allowed to have a children further**. **If an ephemeral znode is deleted, then the next suitable nod will fill its position** (Leader election). Ephemeral znodes play an important role in Leader election.|`create -e /path data`|
 |**Sequential**| Sequential znodes **can be either persistent or ephemeral**. When a new znode is created as a sequential znode, then ZooKeeper sets the path of the znode by attaching a 10 digit sequence number to the original name. For example, if a znode with path /myapp is created as a sequential znode, ZooKeeper will change the path to /myapp0000000001 and set the next sequence number as 0000000002. If two sequential znodes are created concurrently, then ZooKeeper never uses the same number for each znode. Sequential znodes play an important role in Locking and Synchronization.|`create -s /path data` or `create -s -e /path data`|
